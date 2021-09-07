@@ -246,6 +246,7 @@ public class BarcodeScanner extends CordovaPlugin {
                 }
                 //this.success(new PluginResult(PluginResult.Status.OK, obj), this.callback);
                 this.callbackContext.success(this.objArray);
+                this.objArray = new JSONArray();
             } else {
                 //this.error(new PluginResult(PluginResult.Status.ERROR), this.callback);
                 this.callbackContext.error("Unexpected error");
