@@ -65,8 +65,6 @@ public class BarcodeScanner extends CordovaPlugin {
     private JSONArray requestArgs;
     private CallbackContext callbackContext;
 
-    private JSONArray objArray = new JSONArray();
-
     /**
      * Constructor.
      */
@@ -218,7 +216,6 @@ public class BarcodeScanner extends CordovaPlugin {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
         if (requestCode == REQUEST_CODE && this.callbackContext != null) {
             if (resultCode == Activity.RESULT_OK) {
                 JSONObject obj = new JSONObject();
@@ -230,11 +227,7 @@ public class BarcodeScanner extends CordovaPlugin {
                     Log.d(LOG_TAG, "This should never happen");
                 }
                 //this.success(new PluginResult(PluginResult.Status.OK, obj), this.callback);
-                
-                this.objArray.put(obj);
-
-                this.scan(this.requestArgs);
-                // this.callbackContext.success(this.objArray);
+                this.callbackContext.success(obj);
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 JSONObject obj = new JSONObject();
                 try {
@@ -245,7 +238,7 @@ public class BarcodeScanner extends CordovaPlugin {
                     Log.d(LOG_TAG, "This should never happen");
                 }
                 //this.success(new PluginResult(PluginResult.Status.OK, obj), this.callback);
-                this.callbackContext.success(this.objArray);
+                this.callbackContext.success(obj);
             } else {
                 //this.error(new PluginResult(PluginResult.Status.ERROR), this.callback);
                 this.callbackContext.error("Unexpected error");
