@@ -57,6 +57,7 @@ public class BarcodeScanner extends CordovaPlugin {
     private static final String EMAIL_TYPE = "EMAIL_TYPE";
     private static final String PHONE_TYPE = "PHONE_TYPE";
     private static final String SMS_TYPE = "SMS_TYPE";
+    private static final String CONTINUOUS_SCANNING = "continuousScanning";
 
     private static final String LOG_TAG = "BarcodeScanner";
 
@@ -219,6 +220,25 @@ public class BarcodeScanner extends CordovaPlugin {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
+        boolean continuousScanning = false;
+
+        if (this.requestArgs.length() > 0) {
+
+            JSONObject args;
+
+            for (int i = 0; i < this.requestArgs.length(); i++) {
+
+                try {
+                    args = this.requestArgs.getJSONObject(i);
+                } catch (JSONException e) {
+                    Log.i("CordovaLog", e.getLocalizedMessage());
+                    continue;
+                }
+
+                continuousScanning = args.optBoolean(CONTINUOUS_SCANNING, false);
+            }
+        }
+
         if (requestCode == REQUEST_CODE && this.callbackContext != null) {
             if (resultCode == Activity.RESULT_OK) {
                 JSONObject obj = new JSONObject();
@@ -231,10 +251,12 @@ public class BarcodeScanner extends CordovaPlugin {
                 }
                 //this.success(new PluginResult(PluginResult.Status.OK, obj), this.callback);
                 
-                this.objArray.put(obj);
-
-                this.scan(this.requestArgs);
-                // this.callbackContext.success(this.objArray);
+                if (continuousScanning) {
+                    this.objArray.put(obj);
+                    this.scan(this.requestArgs);
+                } else {
+                    this.callbackContext.success(obj);
+                }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 JSONObject obj = new JSONObject();
                 try {
@@ -245,8 +267,12 @@ public class BarcodeScanner extends CordovaPlugin {
                     Log.d(LOG_TAG, "This should never happen");
                 }
                 //this.success(new PluginResult(PluginResult.Status.OK, obj), this.callback);
-                this.callbackContext.success(this.objArray);
-                this.objArray = new JSONArray();
+                if (continuousScanning) {
+                    this.callbackContext.success(this.objArray);
+                    this.objArray = new JSONArray();
+                } else {
+                    this.callbackContext.success(obj);
+                }
             } else {
                 //this.error(new PluginResult(PluginResult.Status.ERROR), this.callback);
                 this.callbackContext.error("Unexpected error");
